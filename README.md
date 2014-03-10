@@ -1,8 +1,6 @@
 # Synth
 
-A javascript library to ease the creation of synthesizers using the Web Audio API
-
-Still pretty much a work in progress, only supports webkit browsers at the moment.
+A small wrapper for the Web Audio API, supports webkit
 
 ## Example
 
