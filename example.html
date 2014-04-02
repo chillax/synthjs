@@ -3,7 +3,10 @@
         <style>input {display:block} .osc {display: inline-block}</style>
     </head>
     <body>
-        <h1>Synth</h1>
+		<h1>Synth</h1>
+
+		<canvas></canvas>
+
         <div class="osc" id="osc1">
             <h2>Oscillator 1</h2>
             <label>Type</label>
@@ -15,28 +18,6 @@
             <label>Gain</label>
             <input id="osc1Gain" type="range" value="-1" min="-1" max="1" step="0.01" />
         </div>    
-        <div class="osc" id="osc2">
-            <h2>Oscillator 2</h2>
-            <label>Type</label>
-            <input id="osc2Type" type="range" value="0" min="0" max="3" step="1" />
-            <label>Frequency</label>
-            <input id="osc2Freq" type="range" value="440" min="10" max="2000" step="1" />
-            <label>Detune</label>
-            <input id="osc2Detune" type="range" value="0" min="-100" max="100" step="10" />
-            <label>Gain</label>
-            <input id="osc2Gain" type="range" value="-1" min="-1" max="1" step="0.01" />
-        </div>
-        <div class="osc" id="osc3">
-            <h2>Oscillator 3</h2>
-            <label>Type</label>
-            <input id="osc3Type" type="range" value="0" min="0" max="3" step="1" />
-            <label>Frequency</label>
-            <input id="osc3Freq" type="range" value="440" min="10" max="2000" step="1" />
-            <label>Detune</label>
-            <input id="osc3Detune" type="range" value="0" min="-100" max="100" step="10" />
-            <label>Gain</label>
-            <input id="osc3Gain" type="range" value="-1" min="-1" max="1" step="0.01" />
-        </div>
 
         <h2>Filter 1</h2>
         <label>Filter</label>
@@ -47,27 +28,31 @@
         <script src="synth.js"></script>
         <script>
             window.onload = function() {
+				var types = ["sine","square","sawtooth", "triangle"];
 
                 var synth = new Synth();
                 synth.init();
                 var osc1 = synth.Oscillator(0);
-                var osc2 = synth.Oscillator(0);
-                var osc3 = synth.Oscillator(0);
                 var filter1 = synth.Filter(1, 512);
-                var gain1 = synth.Gain(-1);
-                var gain2 = synth.Gain(-1);
-                var gain3 = synth.Gain(-1);
-                osc1 = synth.route([osc1, gain1]);
-                osc2 = synth.route([osc2, gain2]);
-                osc3 = synth.route([osc3, gain3]);
+				var gain1 = synth.Gain(-1);
+				var analyser = synth.Analyser(-140, 0);
+                route1 = synth.route([osc1, gain1, analyser]);
+				
+				var canvas = document.querySelector('canvas');
+				canvas.width = 640;
+				canvas.height = 480;
+				var drawContext = canvas.getContext('2d');
+
+				requestAnimationFrame(synth.draw.bind(synth, analyser, drawContext, canvas.width, canvas.height, canvas));
+
 
                 var osc1Type = document.getElementById('osc1Type');
                 var osc1Freq = document.getElementById('osc1Freq');
                 var osc1Detune = document.getElementById('osc1Detune');
                 var osc1Gain = document.getElementById('osc1Gain');
 
-                osc1Type.onchange = function() {
-                    osc1.type = osc1Type.value;
+				osc1Type.onchange = function() {
+                    osc1.type = types[osc1Type.value];
                 }
                 osc1Freq.onchange = function() {
                     osc1.frequency.value = osc1Freq.value;
@@ -79,47 +64,12 @@
                     gain1.gain.value = osc1Gain.value;
                 }
 
-                var osc2Type = document.getElementById('osc2Type');
-                var osc2Freq = document.getElementById('osc2Freq');
-                var osc2Detune = document.getElementById('osc2Detune');
-                var osc2Gain = document.getElementById('osc2Gain');
+				var filter1Freq = document.getElementById('filter');
+				filter1Freq.onchange = function() {
+					filter1.frequency.value = filter1Freq.value;
+				}
 
-                osc2Type.onchange = function() {
-                    osc2.type = osc2Type.value;
-                }
-                osc2Freq.onchange = function() {
-                    osc2.frequency.value = osc2Freq.value;
-                }
-                osc2Detune.onchange = function() {
-                    osc2.detune.value = osc2Detune.value;
-                }
-                osc2Gain.onchange = function() {
-                    gain2.gain.value = osc2Gain.value;
-                }
-
-                var osc3Type = document.getElementById('osc3Type');
-                var osc3Freq = document.getElementById('osc3Freq');
-                var osc3Detune = document.getElementById('osc3Detune');
-                var osc3Gain = document.getElementById('osc3Gain');
-
-                osc3Type.onchange = function() {
-                    osc3.type = osc3Type.value;
-                }
-                osc3Freq.onchange = function() {
-                    osc3.frequency.value = osc3Freq.value;
-                }
-                osc3Detune.onchange = function() {
-                    osc3.detune.value = osc3Detune.value;
-                }
-                osc3Gain.onchange = function() {
-                    gain3.gain.value = osc3Gain.value;
-                }
-
-
-                osc1.noteOn(0);
-                osc2.noteOn(0);
-                osc3.noteOn(0);
-
+                route1.noteOn(0);
             }
         </script>
     </body>
